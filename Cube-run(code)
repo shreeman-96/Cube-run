@@ -1,0 +1,70 @@
+from ursina import *
+
+app = Ursina()
+window.fullscreen = True
+
+for i in range(201):
+    for n in range(5):
+        block = Entity(model = 'cube', collider = 'box', color = color.green, texture = 'grass', position = (n, 0, i))
+
+cube = Entity(model = 'cube', color = color.blue, texture = 'white_cube', collider = 'box', position = (1, 5, 0))
+
+friction = 0.1
+gravity = 0.4
+list = ['left', 'right']
+camera.position = (cube.x, 2, -40)
+score = 0
+
+Sky()
+
+enemy = Entity(model = 'cube', collider = 'box', color = color.black, texture = 'brick', position = (cube.x, 1, cube.z + 10))
+enemy2 = duplicate(enemy)
+camera.position = cube.position
+
+def update():
+    global gravity
+    global friction
+    global score
+    velocity = 0.3
+    cube.z += velocity
+    camera.z += velocity
+    cube.y -= gravity
+    camera.y -= gravity
+    hit_info = cube.intersects()
+    hit_info2 = cube.intersects(enemy)
+    hit_info3 = cube.intersects(enemy2)
+    if hit_info.hit:
+        gravity = 0
+        velocity = velocity - friction
+    if hit_info.hit==False:
+        gravity = 0.4
+    if hit_info2.hit or hit_info3.hit:
+        quit()
+    if held_keys['w']:
+        cube.z += velocity
+        camera.z += velocity
+    if cube.z > enemy.z:
+        enemy.position = (cube.x, 1, cube.z + 10)
+        score = score + 1
+    if held_keys['d']:
+        cube.x += 0.1
+        camera.x += 0.1
+    if held_keys['a']:
+        cube.x -= 0.1
+        camera.x -= 0.1
+    if cube.z>200:
+        print('You scored', str(score) + ' points!')
+        quit()
+    if cube.y < -20:
+        print('You scored', str(score) + ' points!')
+        quit()
+
+def input(key):
+    if key=='1':
+        camera.position = (cube.x, cube.y + 40, cube.z)
+        camera.rotation = Vec3(90, 0, 0)
+    if key=='2':
+        camera.position = cube.position
+        camera.rotation = Vec3(0, 0, 0)
+
+app.run()
